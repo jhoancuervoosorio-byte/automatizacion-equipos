@@ -1,0 +1,11 @@
+REPORTE DE VERIFICACIÓN DE MACs
+========================================
+Fecha: 2025-12-23 15:29:10
+Total MACs verificadas: 2
+✅ Encontradas: 2
+❌ No encontradas: 0
+⚠️  No coinciden: 0
+🔧 Errores: 0
+========================================
+04:8F:00:08:33:9A
+04:8F:00:08:35:A1

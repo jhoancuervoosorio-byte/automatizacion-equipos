@@ -1,0 +1,30 @@
+# Archivos sensibles
+.env
+*.key
+*.pem
+*.p12
+
+# Backups y logs
+backups_macs/
+logs/
+macs.txt
+*.backup
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Firmware (puede ser grande)
+Firmware_*.bin
