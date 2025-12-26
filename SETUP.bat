@@ -1,27 +1,28 @@
 @echo off
-title INSTALADOR AUTOMATICO - AUTOMATIZACION PHANTOM
+title INSTALADOR - AUTOMATIZACION PHANTOM
 color 0B
 
-echo ╔══════════════════════════════════════════╗
-echo ║      INSTALADOR AUTOMATICO - v2.0        ║
-echo ╚══════════════════════════════════════════╝
 echo.
-echo Este instalador configurará el sistema en este PC.
-echo Se creará un acceso directo en el escritorio.
+echo ================================================
+echo      INSTALADOR AUTOMATICO - v2.0
+echo ================================================
+echo.
+echo Este instalador configurara el sistema en este PC.
+echo Se creara un acceso directo en el escritorio.
 echo.
 pause
 
 :: Crear directorio de trabajo
 set "INSTALL_DIR=%USERPROFILE%\Documents\AutomatizacionPhantom"
-echo 📂 Creando directorio: %INSTALL_DIR%
+echo [SETUP] Creando directorio: %INSTALL_DIR%
 mkdir "%INSTALL_DIR%" 2>nul
 
 :: Copiar archivos actuales
-echo 📥 Copiando archivos...
-xcopy /E /Y "%~dp0*" "%INSTALL_DIR%\" >nul
+echo [SETUP] Copiando archivos...
+xcopy /E /Y "%~dp0*" "%INSTALL_DIR%\" >nul 2>&1
 
 :: Crear acceso directo
-echo 📋 Creando acceso directo...
+echo [SETUP] Creando acceso directo...
 echo Set oWS = WScript.CreateObject("WScript.Shell") > "%TEMP%\shortcut.vbs"
 echo sLinkFile = "%USERPROFILE%\Desktop\Automatizacion Phantom.lnk" >> "%TEMP%\shortcut.vbs"
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> "%TEMP%\shortcut.vbs"
@@ -30,54 +31,85 @@ echo oLink.WorkingDirectory = "%INSTALL_DIR%" >> "%TEMP%\shortcut.vbs"
 echo oLink.Description = "Automatizacion Phantom" >> "%TEMP%\shortcut.vbs"
 echo oLink.IconLocation = "%SystemRoot%\System32\SHELL32.dll,165" >> "%TEMP%\shortcut.vbs"
 echo oLink.Save >> "%TEMP%\shortcut.vbs"
-cscript //nologo "%TEMP%\shortcut.vbs"
-del "%TEMP%\shortcut.vbs"
+cscript //nologo "%TEMP%\shortcut.vbs" >nul
+del "%TEMP%\shortcut.vbs" >nul
 
 :: Verificar Python
 echo.
-echo 🐍 Verificando Python...
+echo [PYTHON] Verificando Python...
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo ❌ Python no encontrado
+    echo [ERROR] Python no encontrado
     echo.
-    echo 📥 Descargando Python...
-    powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe' -OutFile '%TEMP%\python-setup.exe'"
-    echo.
-    echo Ejecuta el instalador y marca 'Add Python to PATH'
-    start "" "%TEMP%\python-setup.exe"
-    echo Espera a que termine la instalación de Python...
-    pause
+    echo [INFO] Descarga e instala Python desde:
+    echo        https://www.python.org/downloads/
+    echo [IMPORTANTE] Marca 'Add Python to PATH'
+) else (
+    python --version
+    echo [OK] Python instalado
 )
 
 :: Instalar dependencias
-echo 📦 Instalando dependencias...
+echo.
+echo [PYTHON] Instalando dependencias...
 pip install asyncssh requests python-dotenv >nul 2>&1
 if errorlevel 1 (
-    echo Intentando con pip3...
-    pip3 install asyncssh requests python-dotenv
+    echo [INFO] Intentando con pip3...
+    pip3 install asyncssh requests python-dotenv >nul 2>&1
+)
+
+:: Crear estructura de carpetas
+echo [SETUP] Creando carpetas del sistema...
+mkdir "%INSTALL_DIR%\backups_macs" 2>nul
+mkdir "%INSTALL_DIR%\logs" 2>nul
+mkdir "%INSTALL_DIR%\scripts_phantom_nuevos" 2>nul
+mkdir "%INSTALL_DIR%\scripts_phantom" 2>nul
+
+:: Crear archivos basicos si no existen
+if not exist "%INSTALL_DIR%\.env" (
+    echo [SETUP] Creando archivo .env...
+    echo # Credenciales del portal ISP > "%INSTALL_DIR%\.env"
+    echo ISP_USERNAME=tu_usuario@ejemplo.com >> "%INSTALL_DIR%\.env"
+    echo ISP_PASSWORD=tu_contrasena >> "%INSTALL_DIR%\.env"
+    echo PORTAL_URL=https://isp.somosinternet.com >> "%INSTALL_DIR%\.env"
+    echo MAC_FILE_PATH=macs.txt >> "%INSTALL_DIR%\.env"
+)
+
+if not exist "%INSTALL_DIR%\config_rangos.json" (
+    echo [SETUP] Creando config_rangos.json...
+    echo { > "%INSTALL_DIR%\config_rangos.json"
+    echo     "PhantomNuevo_IP": "192.168.1.1", >> "%INSTALL_DIR%\config_rangos.json"
+    echo     "PhantomReintegro_Base": "192.168.10.", >> "%INSTALL_DIR%\config_rangos.json"
+    echo     "PhantomReintegro_Inicio": 212, >> "%INSTALL_DIR%\config_rangos.json"
+    echo     "PhantomReintegro_Fin": 215 >> "%INSTALL_DIR%\config_rangos.json"
+    echo } >> "%INSTALL_DIR%\config_rangos.json"
 )
 
 :: Mensaje final
 echo.
-echo ╔══════════════════════════════════════════╗
-echo ║         INSTALACION COMPLETADA           ║
-echo ╚══════════════════════════════════════════╝
+echo ================================================
+echo         INSTALACION COMPLETADA
+echo ================================================
 echo.
-echo ✅ Directorio instalado: %INSTALL_DIR%
-echo ✅ Acceso directo creado en el escritorio
-echo ✅ Python y dependencias configuradas
+echo [OK] Directorio instalado: %INSTALL_DIR%
+echo [OK] Acceso directo creado en el escritorio
+echo [OK] Estructura de carpetas creada
+echo [OK] Archivos de configuracion creados
 echo.
-echo 📝 SIGUIENTES PASOS:
+echo [SIGUIENTES PASOS]
 echo 1. Ejecuta el acceso directo del escritorio
-echo 2. Ve a 'Configurar Sistema'
+echo 2. Ve a 'Configurar Sistema' (opcion 3)
 echo 3. Edita el archivo .env con tus credenciales
-echo 4. ¡Listo para usar!
-echo.
-echo 🔗 Repositorio GitHub: 
-echo https://github.com/TU_USUARIO/Automatizacion-Phantom
+echo 4. Listo para usar!
 echo.
 pause
 
-:: Ejecutar el launcher
-cd /d "%INSTALL_DIR%"
-call launcher.bat
+:: Preguntar si ejecutar ahora
+echo.
+set /p "run_now=Ejecutar Automatizacion Phantom ahora? (s/n): "
+if /i "%run_now%"=="s" (
+    cd /d "%INSTALL_DIR%"
+    start "" "launcher.bat"
+)
+
+exit
